@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Der DI-Container: Wer CourseDb braucht, bekommt eine Instanz je Anfrage.
-builder.Services.AddDbContext<CourseDb>(o => o.UseSqlite("Data Source=kurse.db"));
+builder.Services.AddDbContext<CourseDb>(o => o.UseSqlite("Data Source=courses.db"));
 
 var app = builder.Build();
 

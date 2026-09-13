@@ -11,10 +11,10 @@ getestet worden, indem jemand F5 gedrückt hat.
 dotnet run --project 011_Minimal_Api
 ```
 
-Läuft auf `http://localhost:5080`. Die SQLite-Datei `kurse.db` wird beim Start angelegt,
+Läuft auf `http://localhost:5080`. Die SQLite-Datei `courses.db` wird beim Start angelegt,
 falls sie fehlt. Zum Zurücksetzen einfach löschen.
 
-Endpunkte ausprobieren: [`kurse.http`](kurse.http) im Editor öffnen und die Anfragen der
+Endpunkte ausprobieren: [`courses.http`](courses.http) im Editor öffnen und die Anfragen der
 Reihe nach abschicken.
 
 ## Was drin ist
