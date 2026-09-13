@@ -1,0 +1,22 @@
+<Project>
+
+  <!--
+    Zentrale Paketverwaltung: Alle Paketversionen stehen hier, die csproj-Dateien
+    nennen nur noch den Namen. So tragen alle Staende dieselbe Version, und ein
+    Update passiert an genau einer Stelle.
+
+    Die Datei muss auch dann hier liegen, wenn das Repository unterhalb eines
+    Ordners liegt, der bereits eine Directory.Packages.props hat: MSBuild sucht
+    nach oben und nimmt die ERSTE Datei, die es findet.
+  -->
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.11" />
+  </ItemGroup>
+
+</Project>

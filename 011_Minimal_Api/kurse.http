@@ -1,0 +1,80 @@
+### Kursverwaltung — Minimal API
+### In Visual Studio, VS Code (REST Client) oder Rider auf "Send Request" klicken.
+
+@host = http://localhost:5080
+
+### Alle Kurse
+GET {{host}}/courses
+
+### Ein Kurs
+GET {{host}}/courses/1
+
+### Ein Kurs, den es nicht gibt  ->  404
+GET {{host}}/courses/999
+
+### Keine gültige Id  ->  404, die Route trifft gar nicht  ({id:int})
+GET {{host}}/courses/abc
+
+### Neuer Kurs  ->  201 mit Location-Header
+POST {{host}}/courses
+Content-Type: application/json
+
+{
+  "title": "Blazor Grundlagen",
+  "trainer": "Koeck",
+  "priceEuro": 390,
+  "seats": 12,
+  "startsOn": "2026-11-03"
+}
+
+### Neuer Kurs, alles falsch  ->  400 mit ValidationProblemDetails
+POST {{host}}/courses
+Content-Type: application/json
+
+{
+  "title": "",
+  "trainer": "",
+  "priceEuro": -5,
+  "seats": 0,
+  "startsOn": "2020-01-01"
+}
+
+### Kurs ändern  ->  200
+PUT {{host}}/courses/1
+Content-Type: application/json
+
+{
+  "title": "Blazor Grundlagen",
+  "trainer": "Koeck",
+  "priceEuro": 420,
+  "seats": 15,
+  "startsOn": "2026-11-10"
+}
+
+### ---------------------------------------------------------------------------
+### Der eingebaute Fehler: dasselbe Datum, zwei verschiedene Antworten.
+### Das POST oben lehnt "2020-01-01" mit 400 ab. Dieses PUT nimmt es mit 200 an,
+### weil die Regel beim Kopieren übersehen wurde. Probieren Sie beides aus.
+### ---------------------------------------------------------------------------
+PUT {{host}}/courses/1
+Content-Type: application/json
+
+{
+  "title": "Blazor Grundlagen",
+  "trainer": "Koeck",
+  "priceEuro": 390,
+  "seats": 12,
+  "startsOn": "2020-01-01"
+}
+
+### Anmelden  ->  200, EnrolledCount steigt
+POST {{host}}/courses/1/enrol
+
+### Anmelden, bis der Kurs voll ist  ->  409 "Der Kurs ist ausgebucht."
+POST {{host}}/courses/1/enrol
+
+### Kurs löschen  ->  204
+DELETE {{host}}/courses/1
+
+### Nochmal löschen  ->  404
+DELETE {{host}}/courses/1
