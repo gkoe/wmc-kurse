@@ -48,7 +48,7 @@ Nicht, weil es schlecht gemacht wäre. Weil es *so* gemacht ist:
 > angenommen. Beim Kopieren übersehen. Genau so passiert es in echt — und genau deshalb
 > gehört eine Regel an **eine** Stelle und nicht an zwei.
 >
-> Probieren Sie es aus: die beiden markierten Anfragen in `kurse.http`.
+> Probieren Sie es aus: die beiden markierten Anfragen in `courses.http`.
 
 ## Die drei Änderungswünsche
 
