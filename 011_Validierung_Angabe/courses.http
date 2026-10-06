@@ -1,0 +1,158 @@
+### Kursverwaltung — Prüfstand für die Validierung
+### Der Reihe nach abschicken. Hinter jeder Anfrage steht, was sie liefern MUSS.
+### Vor dem ersten Durchlauf courses.db löschen, damit die Titel noch frei sind.
+
+@host = http://localhost:5080
+
+### Alle Kurse
+GET {{host}}/courses
+
+### Ein Kurs
+GET {{host}}/courses/1
+
+### Ein Kurs, den es nicht gibt  ->  404
+GET {{host}}/courses/999
+
+### Keine gültige Id  ->  404, die Route trifft gar nicht  ({id:int})
+GET {{host}}/courses/abc
+
+### ===========================================================================
+### Ausgangslage: zwei gültige Kurse
+### ===========================================================================
+
+### Gültiger Kurs A  ->  201
+# @name courseA
+POST {{host}}/courses
+Content-Type: application/json
+
+{
+  "title": "Blazor Grundlagen",
+  "trainer": "Koeck",
+  "priceEuro": 390,
+  "seats": 12,
+  "startsOn": "2027-03-01"
+}
+
+### Gültiger Kurs B  ->  201
+# @name courseB
+POST {{host}}/courses
+Content-Type: application/json
+
+{
+  "title": "EF Core kompakt",
+  "trainer": "Koeck",
+  "priceEuro": 0,
+  "seats": 200,
+  "startsOn": "2027-04-12"
+}
+
+
+### ===========================================================================
+### POST — je eine Regel verletzt
+### ===========================================================================
+
+### title leer (nur Leerzeichen)  ->  400, errors.title
+POST {{host}}/courses
+Content-Type: application/json
+
+{ "title": "   ", "trainer": "Koeck", "priceEuro": 100, "seats": 10, "startsOn": "2027-05-01" }
+
+### title mit 121 Zeichen  ->  400, errors.title
+POST {{host}}/courses
+Content-Type: application/json
+
+{ "title": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "trainer": "Koeck", "priceEuro": 100, "seats": 10, "startsOn": "2027-05-01" }
+
+### title mit genau 120 Zeichen  ->  201 (Grenzwert ist erlaubt)
+POST {{host}}/courses
+Content-Type: application/json
+
+{ "title": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "trainer": "Koeck", "priceEuro": 100, "seats": 10, "startsOn": "2027-05-01" }
+
+### title existiert bereits  ->  400, errors.title
+POST {{host}}/courses
+Content-Type: application/json
+
+{ "title": "Blazor Grundlagen", "trainer": "Koeck", "priceEuro": 100, "seats": 10, "startsOn": "2027-05-01" }
+
+### trainer leer  ->  400, errors.trainer
+POST {{host}}/courses
+Content-Type: application/json
+
+{ "title": "Neuer Kurs 1", "trainer": "", "priceEuro": 100, "seats": 10, "startsOn": "2027-05-01" }
+
+### priceEuro negativ  ->  400, errors.priceEuro
+POST {{host}}/courses
+Content-Type: application/json
+
+{ "title": "Neuer Kurs 2", "trainer": "Koeck", "priceEuro": -0.01, "seats": 10, "startsOn": "2027-05-01" }
+
+### seats 0  ->  400, errors.seats
+POST {{host}}/courses
+Content-Type: application/json
+
+{ "title": "Neuer Kurs 3", "trainer": "Koeck", "priceEuro": 100, "seats": 0, "startsOn": "2027-05-01" }
+
+### seats 201  ->  400, errors.seats
+POST {{host}}/courses
+Content-Type: application/json
+
+{ "title": "Neuer Kurs 4", "trainer": "Koeck", "priceEuro": 100, "seats": 201, "startsOn": "2027-05-01" }
+
+### startsOn in der Vergangenheit  ->  400, errors.startsOn
+POST {{host}}/courses
+Content-Type: application/json
+
+{ "title": "Neuer Kurs 5", "trainer": "Koeck", "priceEuro": 100, "seats": 10, "startsOn": "2020-01-01" }
+
+
+### ===========================================================================
+### POST — alles falsch: ALLE fünf Felder müssen in errors stehen
+### ===========================================================================
+
+### Alles falsch  ->  400, errors.title, trainer, priceEuro, seats, startsOn
+POST {{host}}/courses
+Content-Type: application/json
+
+{
+  "title": "",
+  "trainer": "",
+  "priceEuro": -5,
+  "seats": 0,
+  "startsOn": "2020-01-01"
+}
+
+
+### ===========================================================================
+### PUT — dieselben Regeln
+### ===========================================================================
+
+### Kurs A ändern, Titel bleibt gleich  ->  200 (der eigene Titel ist kein Duplikat!)
+PUT {{host}}/courses/{{courseA.response.body.$.id}}
+Content-Type: application/json
+
+{ "title": "Blazor Grundlagen", "trainer": "Koeck", "priceEuro": 420, "seats": 15, "startsOn": "2027-03-08" }
+
+### Kurs A bekommt den Titel von Kurs B  ->  400, errors.title
+PUT {{host}}/courses/{{courseA.response.body.$.id}}
+Content-Type: application/json
+
+{ "title": "EF Core kompakt", "trainer": "Koeck", "priceEuro": 420, "seats": 15, "startsOn": "2027-03-08" }
+
+### startsOn in der Vergangenheit  ->  400, errors.startsOn  (in der Vorlage ein 200 - der eingebaute Fehler)
+PUT {{host}}/courses/{{courseA.response.body.$.id}}
+Content-Type: application/json
+
+{ "title": "Blazor Grundlagen", "trainer": "Koeck", "priceEuro": 390, "seats": 12, "startsOn": "2020-01-01" }
+
+### Alles falsch  ->  400, alle fünf Felder
+PUT {{host}}/courses/{{courseA.response.body.$.id}}
+Content-Type: application/json
+
+{ "title": "", "trainer": "", "priceEuro": -5, "seats": 0, "startsOn": "2020-01-01" }
+
+### Kurs gibt es nicht, Daten auch falsch  ->  404 (nicht 400!)
+PUT {{host}}/courses/999
+Content-Type: application/json
+
+{ "title": "", "trainer": "", "priceEuro": -5, "seats": 0, "startsOn": "2020-01-01" }
